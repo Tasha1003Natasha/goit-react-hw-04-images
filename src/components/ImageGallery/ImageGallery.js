@@ -99,3 +99,4 @@ ImageGallery.propTotype = {
   imageName: PropTypes.string.isRequired,
   handleImageURL: PropTypes.func.isRequired,
 };
+// ///////////////////////////////////////////////
