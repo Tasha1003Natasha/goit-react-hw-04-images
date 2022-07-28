@@ -34,41 +34,16 @@ export class ImageGallery extends Component {
           if (response.ok) {
             return response.json();
           }
-          //   return Promise.reject(
-          //     new Error(`There is no image with that ${imageName}`)
-          //   );
         })
         .then(data => this.setState({ images: data, status: STATUS.Success }))
         .catch(error => this.setState({ error, status: STATUS.Error }));
-      // .finally(() => this.setState({ loading: false }));
     }
   }
 
   handleLoadMore = () => {
-    // const { page } = this.state;
-    // const { imageName } = this.props;
-
-    // this.setState({ isLoadMore: true });
     this.setState(prevState => ({
       page: prevState.page + 1,
     }));
-    // fetch(
-    //   `https://pixabay.com/api/?q=${imageName}&page=${page}&key=28317427-cd386f88f666cbda8176ce58f&image_type=photo&orientation=horizontal&per_page=12
-    //   }`
-    // )
-    //   .then(res => res.json())
-    //   .then(response => {
-    //     this.setState(prevState => ({
-    //       images: {
-    //         ...response,
-    //         data: [...prevState.images.hits, ...response.hits],
-    //       },
-    //     }));
-    //   })
-    //   .catch(() => {
-    //     toast.error('Something went wrong!');
-    //   })
-    //   .finally(() => this.setState({ isLoadMore: false }));
   };
 
   render() {

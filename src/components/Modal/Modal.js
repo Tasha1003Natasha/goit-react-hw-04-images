@@ -1,53 +1,47 @@
-import { Component } from 'react';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
 import '../styles.css';
 
-export class Modal extends Component {
-  componentDidMount() {
+export const Modal = ({ handleModal, largeImageURL, tags }) => {
+  useEffect(() => {
+    const handleCloseModal = event => {
+      if (event.code === 'Escape') {
+        handleModal();
+      }
+    };
     document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', this.handleCloseModal);
-  }
+    window.addEventListener('keydown', handleCloseModal);
+    return () => {
+      document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleCloseModal);
+    };
+  }, [handleModal]);
 
-  componentWillUnmount() {
-    document.body.style.overflow = 'unset';
-    window.removeEventListener('keydown', this.handleCloseModal);
-  }
-
-  handleCloseModal = event => {
-    if (event.code === 'Escape') {
-      this.props.handleModal();
-    }
-  };
-
-  handleOverlay = event => {
+  const handleOverlay = event => {
     if (event.currentTarget === event.target) {
-      this.props.handleModal();
+      handleModal();
     }
   };
 
-  render() {
-    const { handleModal, largeImageURL, tags } = this.props;
-
-    return createPortal(
-      <>
-        <button type="button" onClick={handleModal}>
-          Open modal
-        </button>
-        <div className="Overlay" onClick={this.handleOverlay}>
-          <div className="Modal">
-            <img
-              className="ImageGalleryItem-large"
-              src={largeImageURL}
-              alt={tags}
-            />
-          </div>
+  return createPortal(
+    <>
+      <button type="button" onClick={handleModal}>
+        Open modal
+      </button>
+      <div className="Overlay" onClick={handleOverlay}>
+        <div className="Modal">
+          <img
+            className="ImageGalleryItem-large"
+            src={largeImageURL}
+            alt={tags}
+          />
         </div>
-      </>,
-      document.body
-    );
-  }
-}
+      </div>
+    </>,
+    document.body
+  );
+};
 
 Modal.propTypes = {
   handleModal: PropTypes.func.isRequired,
