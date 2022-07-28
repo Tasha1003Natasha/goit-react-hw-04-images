@@ -1,54 +1,37 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { Searchbar } from '../components/Searchbar/Searchbar';
 import { ImageGallery } from '../components/ImageGallery/ImageGallery';
 import { Modal } from '../components/Modal/Modal';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export class App extends Component {
-  state = {
-    imageName: '',
-    largeImageURL: '',
-    tags: '',
+export const App = () => {
+  const [imageName, setImageName] = useState('');
+  const [largeImageURL, setLargeImageURL] = useState('');
+  const [tags, setTags] = useState('');
+
+  const handleModal = () => {
+    setLargeImageURL('');
+    setTags('');
   };
 
-  handleFormSubmit = imageName => {
-    this.setState({ imageName });
+  const handleImageURL = ({ largeImageURL, tags }) => {
+    setLargeImageURL(largeImageURL);
+    setTags(tags);
   };
 
-  handleModal = () => {
-    this.setState(state => ({
-      largeImageURL: '',
-      tags: '',
-    }));
-  };
-
-  handleImageURL = ({ largeImageURL, tags }) => {
-    this.setState(state => ({
-      largeImageURL: largeImageURL,
-      tags: tags,
-    }));
-  };
-
-  render() {
-    const { largeImageURL, tags } = this.state;
-
-    return (
-      <div>
-        <Searchbar onSubmit={this.handleFormSubmit} />
-        <ImageGallery
-          imageName={this.state.imageName}
-          handleImageURL={this.handleImageURL}
+  return (
+    <div>
+      <Searchbar onSubmit={setImageName} />
+      <ImageGallery imageName={imageName} handleImageURL={handleImageURL} />
+      <ToastContainer />
+      {largeImageURL && (
+        <Modal
+          handleModal={handleModal}
+          largeImageURL={largeImageURL}
+          tags={tags}
         />
-        <ToastContainer />
-        {largeImageURL && (
-          <Modal
-            handleModal={this.handleModal}
-            largeImageURL={largeImageURL}
-            tags={tags}
-          />
-        )}
-      </div>
-    );
-  }
-}
+      )}
+    </div>
+  );
+};
