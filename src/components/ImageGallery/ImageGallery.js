@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import '../styles.css';
 import { toast } from 'react-toastify';
@@ -11,102 +11,89 @@ const STATUS = {
   Success: 'success',
 };
 
-export class ImageGallery extends Component {
-  state = {
-    images: {},
-    page: 1,
-    error: null,
-    status: 'idle',
-    isLoadMore: false,
+export const ImageGallery = ({ imageName, handleImageURL }) => {
+  const [images, setImages] = useState({});
+  const [page, setPage] = useState(1);
+  // const [setError] = useState(null);
+  const [status, setStatus] = useState('idle');
+  const [isLoadMore] = useState(false);
+
+  useEffect(() => {
+    if (!imageName) return;
+    setStatus(STATUS.Loading);
+    fetch(
+      `https://pixabay.com/api/?q=${imageName}&page=${page}&key=28317427-cd386f88f666cbda8176ce58f&image_type=photo&orientation=horizontal&per_page=12`
+    )
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+      })
+      .then(data => {
+        setImages(data);
+        setStatus(STATUS.Success);
+      })
+      .catch(error => {
+        // setError(error);
+        setStatus(STATUS.Error);
+      });
+  }, [imageName, page]);
+
+  const handleLoadMore = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevProps.imageName !== this.props.imageName ||
-      prevState.page !== this.state.page
-    ) {
-      const { imageName } = this.props;
-      this.setState({ status: STATUS.Loading });
-      fetch(
-        `https://pixabay.com/api/?q=${imageName}&page=${this.state.page}&key=28317427-cd386f88f666cbda8176ce58f&image_type=photo&orientation=horizontal&per_page=12`
-      )
-        .then(response => {
-          if (response.ok) {
-            return response.json();
-          }
-        })
-        .then(data => this.setState({ images: data, status: STATUS.Success }))
-        .catch(error => this.setState({ error, status: STATUS.Error }));
-    }
+  if (status === STATUS.Idle) {
+    return <h1 className="Title">Enter the name in the search</h1>;
   }
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
-  };
-
-  render() {
-    const { images, isLoadMore, status, page } = this.state;
-
-    if (status === STATUS.Idle) {
-      return <h1 className="Title">Enter the name in the search</h1>;
-    }
-
-    if (status === STATUS.Loading) {
-      return <Loader />;
-    }
-
-    if (status === STATUS.Error) {
-      return toast.error('Something went wrong!');
-    }
-
-    if (!images?.hits?.length) {
-      return <h2 className="Title">There is no image with that name</h2>;
-    }
-
-    if (status === STATUS.Success) {
-      return (
-        <>
-          <ul className="ImageGallery">
-            {images &&
-              images.hits.map(({ id, webformatURL, largeImageURL, tags }) => (
-                <li
-                  key={id}
-                  className="ImageGalleryItem"
-                  onClick={() =>
-                    this.props.handleImageURL({ largeImageURL, tags })
-                  }
-                >
-                  <img
-                    className="ImageGalleryItem-image"
-                    src={webformatURL}
-                    alt={tags}
-                  />
-                </li>
-              ))}
-          </ul>
-
-          {images.totalHits >= 12 * page && (
-            <div className="ButtonItem">
-              {isLoadMore ? (
-                <Loader />
-              ) : (
-                <button
-                  type="button"
-                  onClick={this.handleLoadMore}
-                  className="Button"
-                >
-                  Load more
-                </button>
-              )}
-            </div>
-          )}
-        </>
-      );
-    }
+  if (status === STATUS.Loading) {
+    return <Loader />;
   }
-}
+
+  if (status === STATUS.Error) {
+    return toast.error('Something went wrong!');
+  }
+
+  if (!images?.hits?.length) {
+    return <h2 className="Title">There is no image with that name</h2>;
+  }
+
+  if (status === STATUS.Success) {
+    return (
+      <>
+        <ul className="ImageGallery">
+          {images &&
+            images.hits.map(({ id, webformatURL, largeImageURL, tags }) => (
+              <li
+                key={id}
+                className="ImageGalleryItem"
+                onClick={() => handleImageURL({ largeImageURL, tags })}
+              >
+                <img
+                  className="ImageGalleryItem-image"
+                  src={webformatURL}
+                  alt={tags}
+                />
+              </li>
+            ))}
+        </ul>
+
+        {images.totalHits >= 12 * page && (
+          <div className="ButtonItem">
+            {isLoadMore ? (
+              <Loader />
+            ) : (
+              <button type="button" onClick={handleLoadMore} className="Button">
+                Load more
+              </button>
+            )}
+          </div>
+        )}
+      </>
+    );
+  }
+};
 
 ImageGallery.propTotype = {
   imageName: PropTypes.string.isRequired,
