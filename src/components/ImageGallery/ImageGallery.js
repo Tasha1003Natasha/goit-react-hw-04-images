@@ -11,12 +11,15 @@ const STATUS = {
   Success: 'success',
 };
 
-export const ImageGallery = ({ imageName, handleImageURL }) => {
+export const ImageGallery = ({
+  imageName,
+  page,
+  handleLoadMore,
+  handleImageURL,
+}) => {
   const [images, setImages] = useState({});
-  const [page, setPage] = useState(1);
-  // const [setError] = useState(null);
   const [status, setStatus] = useState('idle');
-  const [isLoadMore] = useState(false);
+  // const [isLoadMore] = useState(false);
 
   useEffect(() => {
     if (!imageName) return;
@@ -26,11 +29,19 @@ export const ImageGallery = ({ imageName, handleImageURL }) => {
     )
       .then(response => {
         if (response.ok) {
+          // console.log(response);
           return response.json();
         }
       })
       .then(data => {
-        setImages(data);
+        setImages(prev => {
+          if (prev.hits) {
+            return { ...data, hits: [...prev.hits, ...data.hits] };
+          } else {
+            return data;
+          }
+        });
+        console.log(data);
         setStatus(STATUS.Success);
       })
       .catch(error => {
@@ -38,10 +49,6 @@ export const ImageGallery = ({ imageName, handleImageURL }) => {
         setStatus(STATUS.Error);
       });
   }, [imageName, page]);
-
-  const handleLoadMore = () => {
-    setPage(prevState => prevState + 1);
-  };
 
   if (status === STATUS.Idle) {
     return <h1 className="Title">Enter the name in the search</h1>;
@@ -81,13 +88,13 @@ export const ImageGallery = ({ imageName, handleImageURL }) => {
 
         {images.totalHits >= 12 * page && (
           <div className="ButtonItem">
-            {isLoadMore ? (
-              <Loader />
-            ) : (
-              <button type="button" onClick={handleLoadMore} className="Button">
-                Load more
-              </button>
-            )}
+            {/* {isLoadMore ? (
+              <Loader /> */}
+            {/* ) : ( */}
+            <button type="button" onClick={handleLoadMore} className="Button">
+              Load more
+            </button>
+            {/* )} */}
           </div>
         )}
       </>
@@ -99,4 +106,3 @@ ImageGallery.propTotype = {
   imageName: PropTypes.string.isRequired,
   handleImageURL: PropTypes.func.isRequired,
 };
-// ///////////////////////////////////////////////

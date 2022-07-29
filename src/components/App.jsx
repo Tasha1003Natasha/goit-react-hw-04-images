@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export const App = () => {
   const [imageName, setImageName] = useState('');
+  const [page, setPage] = useState(1);
   const [largeImageURL, setLargeImageURL] = useState('');
   const [tags, setTags] = useState('');
 
@@ -20,10 +21,24 @@ export const App = () => {
     setTags(tags);
   };
 
+  const handleSubmit = value => {
+    setImageName(value);
+    setPage(1);
+  };
+
+  const handleLoadMore = () => {
+    setPage(prevState => prevState + 1);
+  };
+
   return (
     <div>
-      <Searchbar onSubmit={setImageName} />
-      <ImageGallery imageName={imageName} handleImageURL={handleImageURL} />
+      <Searchbar onSubmit={handleSubmit} />
+      <ImageGallery
+        imageName={imageName}
+        page={page}
+        handleLoadMore={handleLoadMore}
+        handleImageURL={handleImageURL}
+      />
       <ToastContainer />
       {largeImageURL && (
         <Modal
