@@ -50,6 +50,13 @@ export const ImageGallery = ({
       });
   }, [imageName, page]);
 
+  useEffect(() => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
+  });
+
   if (status === STATUS.Idle) {
     return <h1 className="Title">Enter the name in the search</h1>;
   }
