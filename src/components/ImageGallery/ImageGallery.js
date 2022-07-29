@@ -19,13 +19,13 @@ export const ImageGallery = ({
 }) => {
   const [images, setImages] = useState({});
   const [status, setStatus] = useState('idle');
-  // const [isLoadMore] = useState(false);
+  const [isLoadMore, setIsLoadMore] = useState(false);
 
   useEffect(() => {
     if (!imageName) return;
     setStatus(STATUS.Loading);
     fetch(
-      `https://pixabay.com/api/?q=${imageName}&page=${page}&key=28317427-cd386f88f666cbda8176ce58f&image_type=photo&orientation=horizontal&per_page=12`
+      `https://pixabay.com/api/?q=${imageName}&page=1&key=28317427-cd386f88f666cbda8176ce58f&image_type=photo&orientation=horizontal&per_page=12`
     )
       .then(response => {
         if (response.ok) {
@@ -34,13 +34,7 @@ export const ImageGallery = ({
         }
       })
       .then(data => {
-        setImages(prev => {
-          if (prev.hits) {
-            return { ...data, hits: [...prev.hits, ...data.hits] };
-          } else {
-            return data;
-          }
-        });
+        setImages(data);
         // console.log(data);
         setStatus(STATUS.Success);
       })
@@ -48,14 +42,30 @@ export const ImageGallery = ({
         // setError(error);
         setStatus(STATUS.Error);
       });
-  }, [imageName, page]);
+  }, [imageName]);
 
   useEffect(() => {
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: 'smooth',
-    });
-  });
+    if (page === 1) return;
+    setIsLoadMore(true);
+    fetch(
+      `https://pixabay.com/api/?q=${imageName}&page=${page}&key=28317427-cd386f88f666cbda8176ce58f&image_type=photo&orientation=horizontal&per_page=12`
+    )
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+      })
+      .then(data => {
+        setImages(prev => {
+          return { ...data, hits: [...prev.hits, ...data.hits] };
+        });
+        // console.log(data);
+      })
+      .catch(error => {
+        setStatus(STATUS.Error);
+      })
+      .finally(() => setIsLoadMore(false));
+  }, [imageName, page]);
 
   if (status === STATUS.Idle) {
     return <h1 className="Title">Enter the name in the search</h1>;
@@ -95,13 +105,13 @@ export const ImageGallery = ({
 
         {images.totalHits >= 12 * page && (
           <div className="ButtonItem">
-            {/* {isLoadMore ? (
-              <Loader /> */}
-            {/* ) : ( */}
-            <button type="button" onClick={handleLoadMore} className="Button">
-              Load more
-            </button>
-            {/* )} */}
+            {isLoadMore ? (
+              <Loader />
+            ) : (
+              <button type="button" onClick={handleLoadMore} className="Button">
+                Load more
+              </button>
+            )}
           </div>
         )}
       </>
