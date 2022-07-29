@@ -41,7 +41,7 @@ export const ImageGallery = ({
             return data;
           }
         });
-        console.log(data);
+        // console.log(data);
         setStatus(STATUS.Success);
       })
       .catch(error => {
